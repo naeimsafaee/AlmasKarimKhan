@@ -23,3 +23,4 @@ Route::get('/',function (){
 });
 
 Route::apiResource('category', 'api\CategoryController');
+Route::apiResource('group_category', 'api\GroupCategoryController');

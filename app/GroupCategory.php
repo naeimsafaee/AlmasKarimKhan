@@ -6,5 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class GroupCategory extends Model
 {
-    //
+    protected $fillable = ['name','slug','image_id'];
+
 }

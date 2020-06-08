@@ -40,10 +40,10 @@ class CategoryController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'string|required',
-            'slug' => 'string',
+            'slug' => 'string|required|unique:categories',
             'image' => 'image',
             'parent_id' => 'integer|exists:categories,id',
-            'group_category_id' => 'integer|exists:group_categories,id'
+            'group_category_id' => 'integer|exists:group_categories,id|required'
         ]);
 
         if ($validator->fails()) {
@@ -98,6 +98,8 @@ class CategoryController extends Controller
         if ($category->parent_id != null) {
             $category->parent = Category::find($category->parent_id);
         }
+        if ($category->image_id !== null) $category->image_url = Image::find($category->image_id)->image_path;
+
         unset($category['parent_id']);
         return response()->json($category, 200);
     }
@@ -113,10 +115,10 @@ class CategoryController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'string|required',
-            'slug' => 'string',
+            'slug' => 'string|required|unique:categories',
             'image' => 'image',
             'parent_id' => 'integer|exists:categories,id',
-            'group_category_id' => 'integer|exists:group_categories,id'
+            'group_category_id' => 'integer|exists:group_categories,id|required'
         ]);
 
         if ($validator->fails()) {
