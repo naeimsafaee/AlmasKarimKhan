@@ -21,7 +21,7 @@ class CreateArticlesTable extends Migration
             $table->longText('body')->nullable();
             $table->unsignedBigInteger('image_id')->nullable();
             $table->unsignedBigInteger('thumbnail_image_id')->nullable();
-            $table->string('slug')->unique();
+            $table->string('slug')->unique()->nullable();
             $table->text('seo_desc')->nullable();
             $table->tinyInteger('status')->default(1);
             $table->timestamps();

@@ -8,20 +8,19 @@ use App\Http\Controllers\Controller;
 use App\Image;
 use Illuminate\Http\Request;
 use Validator;
-class GroupCategoryController extends Controller
-{
+
+class GroupCategoryController extends Controller{
     /**
      * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function index()
-    {
+    public function index(){
 
         $categories = GroupCategory::orderBy('created_at', 'ASC')->get();
         $i = 0;
-        foreach ($categories as $category) {
-            if ($category->image_id !== null) $categories[$i]->image_url = Image::find($category->image_id)->image_path;
+        foreach($categories as $category){
+            if($category->image_id !== null)
+                $categories[$i]->image_url = Image::find($category->image_id)->image_path;
             $i++;
         }
 
@@ -31,19 +30,16 @@ class GroupCategoryController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function store(Request $request)
-    {
+    public function store(Request $request){
         $validator = Validator::make($request->all(), [
             'name' => 'string|required',
             'slug' => 'string|required|unique:group_categories',
-            'image' => 'image',
         ]);
 
-        if ($validator->fails()) {
+        if($validator->fails()){
             return response()->json([
                 "responseCode" => 401,
                 "errorCode" => 'incomplete data',
@@ -52,7 +48,7 @@ class GroupCategoryController extends Controller
             ], 401);
         }
 
-        if ($request->file('image')) {
+        if($request->file('image')){
             $file = $request->file('image');
             $extention = $file->getClientOriginalExtension();
             $filename = time() . '.' . $extention;
@@ -79,34 +75,31 @@ class GroupCategoryController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function show($id)
-    {
+    public function show($id){
         $category = GroupCategory::findOrFail($id);
-        if ($category->image_id !== null) $category->image_url = Image::find($category->image_id)->image_path;
+        if($category->image_id !== null)
+            $category->image_url = Image::find($category->image_id)->image_path;
 
         return response()->json($category, 200);
     }
 
     /**
      * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param \Illuminate\Http\Request $request
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, $id)
-    {
+    public function update(Request $request, $id){
         $validator = Validator::make($request->all(), [
             'name' => 'string|required',
-            'slug' => 'string|required|unique:group_categories',
-            'image' => 'image',
+            'slug' => 'string|required|unique:categories,slug,' . $id,
+            'image' => 'file',
         ]);
 
-        if ($validator->fails()) {
+        if($validator->fails()){
             return response()->json([
                 "responseCode" => 401,
                 "errorCode" => 'incomplete data',
@@ -116,12 +109,12 @@ class GroupCategoryController extends Controller
         }
 
         $category = GroupCategory::findOrFail($id);
-        if ($category->image_id !== null) {
+        if($category->image_id !== null){
             $category->image_url = Image::find($category->image_id)->image_path;
             unlink(public_path($category->image_url));
 
         }
-        if ($request->file('image')) {
+        if($request->file('image')){
             $file = $request->file('image');
             $extention = $file->getClientOriginalExtension();
             $filename = time() . '.' . $extention;
@@ -131,23 +124,19 @@ class GroupCategoryController extends Controller
                 'image_type' => $file->getClientMimeType(),
 
             ]);
-            $category = GroupCategory::updateOrCreate(
-                ['id' => $id],
-                [
-                    'name' => $request->name,
-                    'slug' => $request->slug,
-                    'image_id' => $image->id,
+            $category = GroupCategory::updateOrCreate(['id' => $id], [
+                'name' => $request->name,
+                'slug' => $request->slug,
+                'image_id' => $image->id,
 
-                ]);
+            ]);
         } else {
-            $category = GroupCategory::updateOrCreate(
-                ['id' => $id],
-                [
-                    'name' => $request->name,
-                    'slug' => $request->slug,
-                    'image_id' => null,
+            $category = GroupCategory::updateOrCreate(['id' => $id], [
+                'name' => $request->name,
+                'slug' => $request->slug,
+                'image_id' => null,
 
-                ]);
+            ]);
         }
 
         return response()->json($category, 200);
@@ -156,15 +145,13 @@ class GroupCategoryController extends Controller
 
     /**
      * Remove the specified resource from storage.
-     *
-     * @param  int  $id
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
-    {
+    public function destroy($id){
         GroupCategory::findOrFail($id)->delete();
-        $category=new \stdClass();
-        $category->message='deleted';
+        $category = new \stdClass();
+        $category->message = 'deleted';
         return response()->json($category, 200);
     }
 }
